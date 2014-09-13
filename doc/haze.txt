@@ -1,0 +1,121 @@
+>open mailbox
+Opening the small mailbox reveals a leaflet.
+
+>take 
+(leaflet)
+Taken.
+
+>read it
+
+..  ..  ....  ...... ......     Haskellish Abominable Z-machine Emulator  
+::  :: ::  :: ''  :: ::  ''    Zaawansowane Programowanie Funkcyjne, 2004  
+;;;;;; ;;;;;;  ;;;;  ;;;;      Daniel Janus <nathell@zodiac.mimuw.edu.pl> 
+ll  ll ll  ll ll  ,, ll  ,,  
+##  ## ##  ## ###### ######               Dokumentacja u¿ytkowa
+-------------------------------------------------------------------------
+
+1. O programie
+
+HAZE (Haskellish Abominable Z-machine Emulator) jest napisanym w Haskellu
+emulatorem/interpreterem Z-maszyny, czyli wirtualnej maszyny wyspecjalizowanej
+pod k±tem przygodowych gier tekstowych.
+
+HAZE umo¿liwia uruchamianie programów napisanych dla wersji 1-3 Z-maszyny. Nie
+obejmuje to wiêkszo¶ci wspó³czesnych gier pisanych w jêzyku Inform, poniewa¿
+standardowa biblioteka tego ostatniego wymusza kompilacjê dla wersji 6 lub 8;
+mo¿na jednak graæ w wiêkszo¶æ klasycznych gier Infocomu, w szczególno¶ci Zork
+I-III, The Hitchhiker's Guide to the Galaxy, Witness, Hollywood Hijinx i inne.
+
+Program dzia³a pod systemami Windows 9x/ME/NT4/2000/XP/2003 i Linux; powinien
+daæ siê skompilowaæ równie¿ na innych platformach, dla których dostêpny jest
+kompilator GHC (ja u¿ywa³em wersji 6.2.1; inne wersje mog± dzia³aæ lub nie) i
+odpowiednia biblioteka (n)curses.
+
+Niniejsze archiwum zawiera:
+
+w katalogu haze/bin/    prekompilowane binaria dla Win32 i Linuksa
+           haze/src/    kompletny, skomentowany kod ¼ród³owy emulatora
+           haze/doc/    ten dokument
+           haze/tests/  przyk³adowe pliki w Z-kodzie (Zork I-III)
+
+2. Kompilacja
+
+Odbywa siê standardowo: pod Linuksem `make' w katalogu ze ¼ród³ami powinno
+wygenerowaæ plik wykonywalny. `make clean' usuwa po¶rednie pliki obiektów
+wygenerowane podczas kompilacji; `make mrproper' usuwa dodatkowo binarium.
+
+Pod Windows nale¿y uruchomiæ `make -f Makefile.win32'. Bêd± potrzebne: 
+MinGW, MSYS, GNU make, GHC/Win32 i biblioteka PDCurses (testowane wersje: 
+MinGW/gcc 3.2.3, MSYS 1.0.9, make 3.79.1, ghc 6.2.1, pdcurses 2.6).
+
+Przed kompilacj± HAZE'a nale¿y skompilowaæ PDCurses, wygenerowany plik
+pdcurses.a skopiowaæ do katalogu haze/src i wyedytowaæ Makefile.win32,
+ewentualnie poprawiaj±c ¶cie¿kê do pliku curses.h.
+
+KOMPILACJA W LABIE (Linux): nale¿y u¿yæ Makefile.lab -- na komputerach w labie
+nag³ówki ncurses zainstalowane s± w niestandardowym miejscu.
+
+W razie problemów mo¿na u¿yæ prekompilowanych binariów znajduj±cych siê w 
+katalogu haze/bin.
+
+Sposób u¿ycia: haze <storyfile.z3>
+
+3. Zgodno¶æ ze Standardem
+
+HAZE w znacznej czê¶ci (jednak nie ca³kowicie) implementuje Wersje 1-3
+Z-maszyny wyspecyfikowane w dokumencie "The Z-Machine Standards Document,
+Version 1.0". Niezgodno¶ci obejmuj±:
+
+* Dekodowanie tekstu. Standard stwierdza (w rozdziale 3), ¿e w zestawie znaków
+  ZSCII znaki 155-251 mog± byæ mapowane na dowolne znaki Unikodu i ¿e
+  interpreter powinien byæ w stanie wy¶wietliæ co najmniej zakres
+  \u0000-\u00FF (ISO-8859-1). By³oby to uci±¿liwe w implementacji i ma³o
+  przeno¶ne, wiêc HAZE po prostu wy¶wietla pytajniki zamiast znaków nie-ASCII
+  i nie pozwala na wprowadzanie znaków nie-ASCII z klawiatury. W zdecydowanej
+  wiêkszo¶ci przypadków to nie przeszkadza.
+* Zapisywanie i odczytywanie stanu gry. Nie zosta³o zaimplementowane tak
+  naprawdê z braku czasu: gdybym siê na to zdecydowa³, to prawdopodobnie
+  implementowa³bym format zapisu Quetzal (de facto standard u¿ywany przez
+  wiêkszo¶æ wspó³czesnych interpreterów), a to powiêkszy³oby znacznie i tak
+  ju¿ spory kod.
+* Efekty d¼wiêkowe (por. Standard, rozdzia³ 9) nie zosta³y zaimplementowane.
+  U¿ywa ich tylko jedna gra Infocomu w Wersji 3 Z-maszyny, "The Lurking
+  Horror".
+* Strumienie wej¶cia-wyj¶cia: HAZE przyjmuje upraszczaj±ce za³o¿enie, ¿e
+  wej¶ciem i wyj¶ciem jest zawsze terminal; Standard specyfikuje kilka
+  strumieni wej¶cia-wyj¶cia (pamiêæ Z-maszyny, plik z zapisem sesji gry).
+
+4. Uwagi implementacyjne
+
+Moim za³o¿eniem nie by³o napisanie interpretera, który przebije wszystkie inne
+pod wzglêdem rozmiaru, wydajno¶ci i zgodno¶ci ze Standardem (Frotz mo¿e nie
+jest tutaj idealny, ale niewiele mu brakuje). Celem by³o raczej stworzenie
+emulatora na tyle zgodnego ze Standardem, ¿eby móc graæ w Zorka I, w taki
+sposób, by powsta³y kod by³ przejrzysty, dobrze zmodularyzowany i ³atwy w
+rozbudowie. I chyba tak jest: nawet je¶li oficjalnie wspierane s± tylko wersje
+1-3, to ju¿ teraz du¿a czê¶æ kodu wspiera wy¿sze wersje Z-maszyny
+i prawdopodobnie uzyskanie interpretera wszystkich wersji (z wyj±tkiem
+szóstej, do¶æ znacznie ró¿ni±cej siê od pozosta³ych) by³oby do¶æ proste, acz
+czasoch³onne.
+
+Tytu³owa 'abominableness' emulatora wynika poniek±d z faktu, ¿e Haskell nie
+jest najlepszym jêzykiem do pisania tego typu programów. Jest to jêzyk czysto
+funkcyjny, co powoduje na przyk³ad, ¿e tablice nie s± modyfikowalne w czasie
+sta³ym, lecz liniowym (tak przynajmniej twierdzi "Yet Another Haskell
+Tutorial"). W efekcie dla zwiêkszenia przejrzysto¶ci kodu zdecydowa³em siê
+zaimplementowaæ pamiêæ Z-Maszyny za pomoc± drzewa zbalansowanego (FiniteMap)
+-- jest to jednak do¶æ pamiêcio¿erne i wolne. Na szczê¶cie nie na tyle, by nie
+da³o siê graæ :-)
+
+5. Podziêkowania
+
+Podziêkowania dla:
+
+* Qrczaka, za pomoc w doprowadzeniu Curses.hsc z pakietu QForeign do dzialania
+  pod GHC 6.2.1 i ncurses/pdcurses
+* Adama Przepiórkowskiego, za udostêpnienie laptopa do prac developerskich w
+  czasie wyjazdów
+* Grahama Nelsona, za "The Z-Machine Standards Document", bez którego HAZE
+  nie by³by mo¿liwy
+
+
