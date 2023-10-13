@@ -114,10 +114,11 @@ module Curses (
     where
 
 import Prelude hiding (pi)
-import Monad          (liftM)
-import Char           (chr, ord)
-import Ix             (Ix)
-import Bits
+import Control.Monad          (liftM)
+import Data.Char           (chr, ord)
+import Data.Ix             (Ix)
+import Data.Bits
+import System.IO.Unsafe (unsafePerformIO)
 
 import Foreign
 import Foreign.C
@@ -137,14 +138,14 @@ import ConvLocal       (toLocal)
 
 ------------------------------------------------------------------------
 
-throwIfErr :: Num a => String -> IO a -> IO a
+throwIfErr :: (Eq a, Num a) => String -> IO a -> IO a
 throwIfErr name act = do
     res <- act
     if res == (#const ERR)
         then ioError (userError ("Curses: "++name++" failed"))
         else return res
 
-throwIfErr_ :: Num a => String -> IO a -> IO ()
+throwIfErr_ :: (Eq a, Num a) => String -> IO a -> IO ()
 throwIfErr_ name act = void $ throwIfErr name act
 
 ------------------------------------------------------------------------
@@ -317,7 +318,7 @@ colorContent (Color c) =
 foreign import ccall unsafe color_content :: CShort -> Ptr CShort -> Ptr CShort -> Ptr CShort -> IO CInt
 
 foreign import ccall unsafe "hs_curses_color_pair" colorPair :: Pair -> (#type chtype)
-#def inline chtype hs_curses_color_pair (HsInt pair) {return COLOR_PAIR (pair);}
+#def chtype hs_curses_color_pair (HsInt pair) {return COLOR_PAIR (pair);}
 
 ------------------------------------------------------------------------
 

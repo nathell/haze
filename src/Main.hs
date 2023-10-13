@@ -11,9 +11,9 @@ where
 
 import Prelude hiding (catch)
 import Control.Exception
-import System
-import System.IO hiding (GHC.Exception.catch)
-
+import System.IO
+import System.IO.Error
+import System.Environment
 import ZMachine.Core
 import ZMachine.Processor
 import ZMachine.Screen
@@ -38,26 +38,23 @@ usage = do
 play :: String -> IO ()
 -- Run the given story file.
 
-play fileName = 
-  catchJust ioErrors (doPlay fileName)
-    (\e -> if isDoesNotExistError e then 
-             putStrLn ("Could not open file: " ++ fileName) 
-           else 
-             ioError e)
+play fileName =
+  catchJust (\e -> if isDoesNotExistError e then Just "" else Nothing) (doPlay fileName)
+    (\e -> putStrLn ("Could not open file: " ++ fileName))
 
 doPlay :: String -> IO ()
 -- This function does the dirty work for play. It initializes the
 -- Z-Machine with the given story file, checks version and fires up
--- the game, intercepting exceptions which may arise. 
+-- the game, intercepting exceptions which may arise.
 
 doPlay fileName = do
   zm <- createZMachine fileName
   let ver = getZMachineVersion zm
-  if ver `elem` [1..3] 
-    then 
-      let runIt zm = 
-            catchJust userErrors (keepRunning zm >> return ()) $
-              (\x -> if x == "quit" then return () else 
+  if ver `elem` [1..3]
+    then
+      let runIt zm =
+            catchJust (\e -> if isUserError e then Just (ioeGetErrorString e) else Nothing) (keepRunning zm >> return ()) $
+              (\x -> if x == "quit" then return () else
                      if x == "restart" then runIt zm else
                      ioError (userError x))
       in runIt zm
